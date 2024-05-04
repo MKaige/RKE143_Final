@@ -1,26 +1,25 @@
 const express = require('express');
-
+const db = require('../db');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
 
     try {
-        const data = db.query('SELECT * FROM todo;');
+        const data = await db.query('SELECT * FROM todo;');
         res.status(200).json({todo: data.rows});
     }
     catch(error) {
         console.log(error);
+        res.status(500).json({errorMessage: 'Internal Server error.'});
     }
     
 });
 
-router.post('/', (req, res) => {
-    console.log(req.body);
+router.post('/', async (req, res) => {
     const { task } = req.body;
 
     try {
         const data = await db.query('INSERT INTO todo (task) VALUES ($1);', [task]);
-        console.log(data);
         res.status(200).json({message: `${data.rowCount} row inserted.`});
     } 
     catch (error) {
@@ -30,7 +29,7 @@ router.post('/', (req, res) => {
 });
 
 router.delete('/', async (req, res) => {
-    const {id} = req;
+    const {id} = req.body;
     const data = await db.query("SELECT * FROM todo WHERE id = $1;", [id]);
 
     if(data.rows.length === 0) {
@@ -47,4 +46,4 @@ router.delete('/', async (req, res) => {
 });
 
 
-module.exports = ; 
+module.exports = router; 
